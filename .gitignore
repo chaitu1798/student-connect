@@ -1,0 +1,15 @@
+node_modules/
+venv/
+*.db
+*.db.*
+*.bak*
+*.key
+*.secret
+.dev_*
+__pycache__/
+security-audit-output/
+.env
+.env.local
+.env.production
+dist/
+uploads/
