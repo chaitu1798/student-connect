@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func
 from app.database import get_db
-from app.models.student import Student, StudentPublicationSetting, StudentAcademic
+from app.models.student import Student, StudentPublicationSetting, StudentAcademic, StudentPrivateData
 from app.models.document import StudentDocument
 from app.models.internship import Internship
 from app.schemas.student import PublicSearchResponse, PublicStudentSummary, PublicStudentDetail
@@ -110,7 +110,7 @@ def get_public_student_profile(roll_number: str, db: Session = Depends(get_db)):
     is strictly never exposed.
     """
     student = db.query(Student).filter(
-        Student.roll_no == roll_number,
+        Student.roll_no.ilike(roll_number.strip()),
         Student.is_archived == False
     ).first()
     if not student:
@@ -140,7 +140,12 @@ def get_public_student_profile(roll_number: str, db: Session = Depends(get_db)):
 
     # Academics
     ac = student.academics
-    priv = student.private_data
+    gender_val = None
+    if pub.publish_gender:
+        gender_row = db.query(StudentPrivateData.gender).filter(
+            StudentPrivateData.student_id == student.id
+        ).first()
+        gender_val = gender_row[0] if gender_row else None
     photo_doc = db.query(StudentDocument).filter(
         StudentDocument.student_id == student.id,
         StudentDocument.document_type.in_(["PASSPORT_PHOTO", "PHOTO"])
@@ -152,7 +157,7 @@ def get_public_student_profile(roll_number: str, db: Session = Depends(get_db)):
         roll_no=student.roll_no,
         branch=student.branch,
         branch_code=student.branch_code,
-        gender=priv.gender if (priv and pub.publish_gender) else None,
+        gender=gender_val,
         ug_cgpa=ac.ug_cgpa if (ac and pub.publish_cgpa) else None,
         ug_year_of_passing=ac.ug_year_of_passing if ac else None,
         ug_year_of_pass=ac.ug_year_of_passing if ac else None,

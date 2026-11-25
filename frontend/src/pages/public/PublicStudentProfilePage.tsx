@@ -167,7 +167,7 @@ export const PublicStudentProfilePage: React.FC<PublicStudentProfilePageProps> =
                 >
                   <div>
                     <h3 className="font-semibold text-[#1D1D1F] text-sm">
-                      {int.role || 'Intern'} · {int.name_of_organization}
+                      {int.role || 'Intern'} · {int.organization_name || int.name_of_organization}
                     </h3>
                     <p className="text-xs text-[#6E6E73] flex items-center gap-1.5 mt-1">
                       <MapPin className="w-3.5 h-3.5" />
